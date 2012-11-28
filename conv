@@ -1,0 +1,7 @@
+#! /bin/bash
+
+for x in in/*; do
+    filename=`basename $x`
+    convert $x -layers merge "out/${filename%*.*}.jpg"
+    rm $x
+done

@@ -1,0 +1,27 @@
+#! /bin/bash
+
+recordname="record/$(date --utc '+%Y%m%d')"
+roundcount=1 #How many posts each time the script is run?
+maxcount=2 #How many posts per day?
+
+if [ -f $recordname ]; then
+    count=`cat $recordname`
+else
+    count=0
+fi
+
+sessioncount=0
+
+for x in `ls -c -r out/*.jpg`; do
+    test -f "$x" || continue
+    [ $count -ge  $maxcount ] && break
+    [ $sessioncount -ge $roundcount ] && break
+    #For the caption we just put the current day and count
+    caption="$(date --utc '+%Y%m%d')-$count"
+    oauth1curl -s -f --data-urlencode 'type=photo' --data-urlencode "data%5B0%5D@$x" --data-urlencode "caption=$caption" 'https://api.tumblr.com/v2/blog/pyokagan.tumblr.com/post' >/dev/null && rm $x && (( count += 1 )) && (( sessioncount += 1 ))
+done
+
+
+mkdir -p $(dirname $recordname)
+
+echo $count > $recordname
